@@ -1,6 +1,7 @@
 {
   "name": "ecommerce-root",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "node backend/server.js",
+    "build": "cd backend && npm install"
   }
 }

@@ -20,11 +20,11 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/qr', require('./routes/qr'));
 
 // Serve frontend static files
-app.use(express.static(path.join(process.cwd(), 'frontend')));
+app.use(express.static(path.join(__dirname, '../frontend')));
 console.log('CWD:', process.cwd());
 console.log('Frontend path:', path.join(process.cwd(), 'frontend'));
 app.get('/', (req, res) => {
-  res.sendFile(path.join(process.cwd(), 'frontend', 'index.html'));
+  res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;

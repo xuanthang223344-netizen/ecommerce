@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopVN - Giỏ hàng</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/index.html"><i class="bi bi-shop"></i> ShopVN</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+          <li class="nav-item"><a class="nav-link" href="/index.html">Trang chủ</a></li>
+          <li class="nav-item"><a class="nav-link" href="/qr-generator.html">Tạo QR</a></li>
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="/cart.html">
+              <i class="bi bi-cart3"></i> Giỏ hàng
+              <span id="cart-badge" class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill d-none">0</span>
+            </a>
+          </li>
+          <li class="nav-item d-none" id="nav-admin"><a class="nav-link" href="/admin/index.html"><i class="bi bi-speedometer2"></i> Admin</a></li>
+          <li class="nav-item d-none" id="nav-profile"><a class="nav-link" href="/profile.html"><i class="bi bi-person-circle"></i> <span id="nav-user-name"></span></a></li>
+          <li class="nav-item" id="nav-login"><a class="nav-link" href="/login.html">Đăng nhập</a></li>
+          <li class="nav-item" id="nav-register"><a class="nav-link" href="/register.html">Đăng ký</a></li>
+          <li class="nav-item d-none" id="nav-logout"><a class="nav-link" href="#"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+          <li class="nav-item">
+            <button id="theme-toggle-btn" class="theme-toggle-btn"><i class="bi bi-moon-stars" id="theme-icon"></i></button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h3 class="section-title"><i class="bi bi-cart3"></i> Giỏ hàng của bạn</h3>
+
+    <div id="empty-cart" class="alert alert-info d-none">
+      Giỏ hàng của bạn đang trống. <a href="/index.html">Tiếp tục mua sắm</a>
+    </div>
+
+    <div id="cart-container" class="row">
+      <div class="col-md-8">
+        <div id="cart-items"></div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-4">
+          <h5 class="fw-bold mb-3">Tổng đơn hàng</h5>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Tổng số lượng:</span>
+            <span id="total-qty">0</span>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <span class="fw-bold">Tổng tiền:</span>
+            <span class="price-tag" id="total-price">0 ₫</span>
+          </div>
+          <button class="btn btn-primary w-100" id="checkout-btn">
+            <i class="bi bi-credit-card"></i> Tiến hành đặt hàng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    function renderCart() {
+      const cart = getCart();
+      const container = document.getElementById('cart-items');
+      const emptyBox = document.getElementById('empty-cart');
+      const cartContainer = document.getElementById('cart-container');
+
+      if (cart.length === 0) {
+        emptyBox.classList.remove('d-none');
+        cartContainer.classList.add('d-none');
+        return;
+      }
+
+      emptyBox.classList.add('d-none');
+      cartContainer.classList.remove('d-none');
+
+      container.innerHTML = cart.map(item => `
+        <div class="card p-3 mb-2">
+          <div class="row align-items-center">
+            <div class="col-2">
+              <img src="${item.image}" class="cart-item-img" alt="${item.name}">
+            </div>
+            <div class="col-4">
+              <h6 class="mb-0">${item.name}</h6>
+              <small class="text-muted">${formatCurrency(item.price)}</small>
+            </div>
+            <div class="col-3">
+              <div class="input-group">
+                <button class="btn btn-outline-secondary btn-sm" onclick="changeQty('${item.product}', ${item.qty - 1})">-</button>
+                <input type="text" class="form-control form-control-sm text-center" value="${item.qty}" readonly>
+                <button class="btn btn-outline-secondary btn-sm" onclick="changeQty('${item.product}', ${item.qty + 1})">+</button>
+              </div>
+            </div>
+            <div class="col-2 text-end fw-bold">
+              ${formatCurrency(item.price * item.qty)}
+            </div>
+            <div class="col-1 text-end">
+              <button class="btn btn-sm btn-outline-danger" onclick="removeItem('${item.product}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('total-qty').textContent = getCartCount();
+      document.getElementById('total-price').textContent = formatCurrency(getCartTotal());
+    }
+
+    function changeQty(productId, newQty) {
+      updateCartItemQty(productId, newQty);
+      renderCart();
+    }
+
+    function removeItem(productId) {
+      removeFromCart(productId);
+      renderCart();
+    }
+
+    document.getElementById('checkout-btn').addEventListener('click', () => {
+      if (!isLoggedIn()) {
+        alert('Vui lòng đăng nhập để tiếp tục đặt hàng');
+        window.location.href = '/login.html';
+        return;
+      }
+      window.location.href = '/checkout.html';
+    });
+
+    renderCart();
+  </script>
+</body>
+</html>

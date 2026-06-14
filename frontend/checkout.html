@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopVN - Thanh toán</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/index.html"><i class="bi bi-shop"></i> ShopVN</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+          <li class="nav-item"><a class="nav-link" href="/index.html">Trang chủ</a></li>
+          <li class="nav-item"><a class="nav-link" href="/qr-generator.html">Tạo QR</a></li>
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="/cart.html">
+              <i class="bi bi-cart3"></i> Giỏ hàng
+              <span id="cart-badge" class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill d-none">0</span>
+            </a>
+          </li>
+          <li class="nav-item d-none" id="nav-admin"><a class="nav-link" href="/admin/index.html"><i class="bi bi-speedometer2"></i> Admin</a></li>
+          <li class="nav-item d-none" id="nav-profile"><a class="nav-link" href="/profile.html"><i class="bi bi-person-circle"></i> <span id="nav-user-name"></span></a></li>
+          <li class="nav-item" id="nav-login"><a class="nav-link" href="/login.html">Đăng nhập</a></li>
+          <li class="nav-item" id="nav-register"><a class="nav-link" href="/register.html">Đăng ký</a></li>
+          <li class="nav-item d-none" id="nav-logout"><a class="nav-link" href="#"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+          <li class="nav-item">
+            <button id="theme-toggle-btn" class="theme-toggle-btn"><i class="bi bi-moon-stars" id="theme-icon"></i></button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h3 class="section-title"><i class="bi bi-credit-card"></i> Thanh toán</h3>
+
+    <!-- Checkout form -->
+    <div id="checkout-form-section" class="row">
+      <div class="col-md-7">
+        <div class="card p-4 mb-3">
+          <h5 class="fw-bold mb-3">Địa chỉ giao hàng</h5>
+          <div class="mb-3">
+            <label class="form-label">Địa chỉ</label>
+            <input type="text" class="form-control" id="address" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Thành phố</label>
+            <input type="text" class="form-control" id="city" required>
+          </div>
+        </div>
+
+        <div class="card p-4">
+          <h5 class="fw-bold mb-3">Phương thức thanh toán</h5>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="paymentMethod" id="payment-cod" value="cod" checked>
+            <label class="form-check-label" for="payment-cod">
+              <i class="bi bi-cash-coin"></i> Thanh toán khi nhận hàng (COD)
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="paymentMethod" id="payment-vietqr" value="vietqr">
+            <label class="form-check-label" for="payment-vietqr">
+              <i class="bi bi-qr-code"></i> Chuyển khoản Techcombank (VietQR)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <div class="card p-4">
+          <h5 class="fw-bold mb-3">Đơn hàng của bạn</h5>
+          <div id="order-items"></div>
+          <hr>
+          <div class="d-flex justify-content-between fw-bold mb-3">
+            <span>Tổng tiền:</span>
+            <span class="price-tag" id="total-price">0 ₫</span>
+          </div>
+          <button class="btn btn-primary w-100" id="place-order-btn">
+            <i class="bi bi-check-circle"></i> Đặt hàng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Code section (hidden initially) -->
+    <div id="qr-section" class="d-none">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body qr-box">
+              <h4 class="fw-bold mb-3"><i class="bi bi-qr-code"></i> Quét mã để thanh toán</h4>
+              <img id="qr-image" src="" alt="QR Code thanh toán">
+              <div class="mt-3 text-start">
+                <p class="mb-1"><strong>Ngân hàng:</strong> Techcombank</p>
+                <p class="mb-1"><strong>Số tài khoản:</strong> 19076203312013</p>
+                <p class="mb-1"><strong>Chủ tài khoản:</strong> TRAN XUAN THANG</p>
+                <p class="mb-1"><strong>Số tiền:</strong> <span id="qr-amount"></span></p>
+                <p class="mb-1"><strong>Nội dung:</strong> <span id="qr-description"></span></p>
+              </div>
+              <div class="alert alert-warning mt-3">
+                Vui lòng chuyển khoản đúng số tiền và nội dung để được xác nhận thanh toán nhanh nhất.
+              </div>
+              <a href="/index.html" class="btn btn-primary w-100 mt-2">
+                <i class="bi bi-house"></i> Về trang chủ
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="alert-box" class="alert alert-danger d-none mt-3"></div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    protectPage();
+
+    function renderOrderItems() {
+      const cart = getCart();
+
+      if (cart.length === 0) {
+        window.location.href = '/cart.html';
+        return;
+      }
+
+      const container = document.getElementById('order-items');
+      container.innerHTML = cart.map(item => `
+        <div class="d-flex justify-content-between mb-2">
+          <span>${item.name} x${item.qty}</span>
+          <span>${formatCurrency(item.price * item.qty)}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('total-price').textContent = formatCurrency(getCartTotal());
+    }
+
+    renderOrderItems();
+
+    document.getElementById('place-order-btn').addEventListener('click', async () => {
+      const address = document.getElementById('address').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      const alertBox = document.getElementById('alert-box');
+      alertBox.classList.add('d-none');
+
+      if (!address || !city) {
+        alertBox.textContent = 'Vui lòng điền đầy đủ địa chỉ giao hàng';
+        alertBox.classList.remove('d-none');
+        return;
+      }
+
+      const cart = getCart();
+      const totalPrice = getCartTotal();
+
+      const orderData = {
+        orderItems: cart.map(item => ({
+          product: item.product,
+          name: item.name,
+          qty: item.qty,
+          price: item.price,
+          image: item.image
+        })),
+        shippingAddress: { address, city },
+        paymentMethod,
+        totalPrice
+      };
+
+      try {
+        const order = await apiPost('/orders', orderData);
+
+        if (paymentMethod === 'cod') {
+          clearCart();
+          window.location.href = '/order-success.html';
+        } else {
+          // vietqr - hiển thị mã QR, ẩn form
+          await showVietQR(order, totalPrice);
+          clearCart();
+        }
+      } catch (error) {
+        alertBox.textContent = error.message;
+        alertBox.classList.remove('d-none');
+      }
+    });
+
+    async function showVietQR(order, totalPrice) {
+      try {
+        const description = `DH${order._id.toString().slice(-8)}`;
+        const qrData = await apiGet(`/qr/vietqr-info?amount=${totalPrice}&description=${encodeURIComponent(description)}`);
+
+        document.getElementById('qr-image').src = qrData.qrUrl;
+        document.getElementById('qr-amount').textContent = formatCurrency(totalPrice);
+        document.getElementById('qr-description').textContent = description;
+
+        document.getElementById('checkout-form-section').classList.add('d-none');
+        document.getElementById('qr-section').classList.remove('d-none');
+      } catch (error) {
+        const alertBox = document.getElementById('alert-box');
+        alertBox.textContent = 'Lỗi tạo mã QR: ' + error.message;
+        alertBox.classList.remove('d-none');
+      }
+    }
+  </script>
+</body>
+</html>

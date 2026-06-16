@@ -36,18 +36,37 @@
           <h3 class="text-center mb-4 fw-bold"><i class="bi bi-box-arrow-in-right"></i> Đăng nhập</h3>
 
           <div id="alert-box" class="alert alert-danger d-none" role="alert"></div>
+          <div id="success-box" class="alert alert-success d-none" role="alert"></div>
 
-          <form id="login-form">
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control" id="email" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Mật khẩu</label>
-              <input type="password" class="form-control" id="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
-          </form>
+          <!-- Bước 1: Email + Mật khẩu -->
+          <div id="step1">
+            <form id="login-form">
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Mật khẩu</label>
+                <input type="password" class="form-control" id="password" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100" id="btn-send-otp">
+                Gửi mã OTP
+              </button>
+            </form>
+          </div>
+
+          <!-- Bước 2: Nhập OTP -->
+          <div id="step2" class="d-none">
+            <p class="text-center text-muted">Mã OTP đã được gửi về email của bạn</p>
+            <form id="otp-form">
+              <div class="mb-3">
+                <label class="form-label">Nhập mã OTP (6 số)</label>
+                <input type="text" class="form-control text-center fs-4 fw-bold" id="otp" maxlength="6" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Xác nhận đăng nhập</button>
+              <button type="button" class="btn btn-outline-secondary w-100 mt-2" id="btn-resend">Gửi lại mã</button>
+            </form>
+          </div>
 
           <p class="text-center mt-3 mb-0">
             Chưa có tài khoản? <a href="/register.html">Đăng ký ngay</a>
@@ -62,26 +81,70 @@
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script>
+    let currentEmail = '';
+    let currentPassword = '';
+
+    const alertBox = document.getElementById('alert-box');
+    const successBox = document.getElementById('success-box');
+
+    function showError(msg) {
+      alertBox.textContent = msg;
+      alertBox.classList.remove('d-none');
+      successBox.classList.add('d-none');
+    }
+
+    function showSuccess(msg) {
+      successBox.textContent = msg;
+      successBox.classList.remove('d-none');
+      alertBox.classList.add('d-none');
+    }
+
+    // Bước 1: Gửi OTP
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const alertBox = document.getElementById('alert-box');
-      alertBox.classList.add('d-none');
+      currentEmail = document.getElementById('email').value;
+      currentPassword = document.getElementById('password').value;
+      const btn = document.getElementById('btn-send-otp');
+      btn.disabled = true;
+      btn.textContent = 'Đang gửi...';
 
       try {
-        const data = await apiPost('/auth/login', { email, password });
-        saveAuth(data);
+        await apiPost('/auth/send-otp', { email: currentEmail, password: currentPassword });
+        showSuccess('Mã OTP đã gửi về ' + currentEmail);
+        document.getElementById('step1').classList.add('d-none');
+        document.getElementById('step2').classList.remove('d-none');
+      } catch (error) {
+        showError(error.message);
+        btn.disabled = false;
+        btn.textContent = 'Gửi mã OTP';
+      }
+    });
 
+    // Bước 2: Xác nhận OTP
+    document.getElementById('otp-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const otp = document.getElementById('otp').value;
+
+      try {
+        const data = await apiPost('/auth/login', { email: currentEmail, otp });
+        saveAuth(data);
         if (data.role === 'admin') {
           window.location.href = '/admin/index.html';
         } else {
           window.location.href = '/index.html';
         }
       } catch (error) {
-        alertBox.textContent = error.message;
-        alertBox.classList.remove('d-none');
+        showError(error.message);
+      }
+    });
+
+    // Gửi lại OTP
+    document.getElementById('btn-resend').addEventListener('click', async () => {
+      try {
+        await apiPost('/auth/send-otp', { email: currentEmail, password: currentPassword });
+        showSuccess('Đã gửi lại mã OTP về ' + currentEmail);
+      } catch (error) {
+        showError(error.message);
       }
     });
   </script>
